@@ -1852,6 +1852,8 @@ The innovation here is not self-healing (that exists), but **self-awareness as a
 **Jesse Li-Yates**  
 [github.com/jegly](https://github.com/jegly)
 
+https://medium.com/@jjjegly/weve-been-building-software-wrong-the-case-for-self-supporting-code-c7a61aa5b174
+
 *December 2025*
 
 ---

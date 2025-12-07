@@ -1379,6 +1379,17 @@ Think of it this way:
 - **Self-supporting observer state**: A function that calculates `tension = 1.0 - success_rate` and uses that metric to choose behavior
 
 The quantum analogies in this document are **metaphors** to illustrate concepts like "existing in multiple states" or "awareness of state." The actual implementation is conventional software with unconventional self-awareness built into its architecture—like a tree that doesn't need quantum mechanics to know when its branches are unbalanced.
+
+## Note on Existing Systems
+
+While several systems implement aspects of autonomous recovery—notably **Erlang/OTP supervisors** with their "let it crash" philosophy and supervision trees, **Kubernetes controllers** with reconciliation loops, and **cloud auto-healing** mechanisms—none fully embody the core principle of this thesis.
+
+Existing self-healing systems rely on **external observers**: Erlang supervisors watch worker processes, Kubernetes controllers monitor pod states, and cloud platforms depend on health check endpoints and monitoring stacks (Prometheus, CloudWatch, etc.). These are reactive, external mechanisms that sit **outside** the components they protect.
+
+**Self-Supporting Code differs fundamentally:** The observer is **embedded within** the component itself. The architecture doesn't need external scaffolding to know its own state—it measures its own tension, calculates its own balance, and corrects its own trajectory. External monitoring becomes optional documentation rather than required infrastructure.
+
+The innovation here is not self-healing (that exists), but **self-awareness as a structural property**—the ternary observer state (⊙) that makes systems truly self-sufficient, like trees that don't need foresters to tell them when their branches are unbalanced.
+
 ---
 
 ## Author

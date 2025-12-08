@@ -439,8 +439,10 @@ class FlowStream:
         # If all paths blocked, water pools (buffer) until path opens
         self._buffer(data)
 ```
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/wtr.png" alt="WTR Diagram" width="600"/>
+</p>
 
-## The Middle Ground as Water
 
 **Think of the MIDDLE GROUND (⊙) as water.**
 

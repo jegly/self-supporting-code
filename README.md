@@ -187,7 +187,10 @@ But nature teaches us differently:
 
 **Natural phenomena demonstrate resilience DESPITE variability.** These aren't incorruptible in the strict sense, but they embody **patterns of persistence** that transcend rigid laws.
 
-## Nature's Resilience Patterns
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/nrp.png" alt="NRP Diagram" width="600"/>
+</p>
+
 
 These patterns exist independent of physics or linear models—they are **archetypes of resilience**:
 
@@ -488,7 +491,10 @@ class StatelessOrganism:
             return "maintain"
 ```
 
-## Closed-Loop Systems = Self-Sustainability
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/cl.png" alt="CL Diagram" width="600"/>
+</p>
+
 
 Nature's most resilient systems are **closed loops**:
 - Carbon cycle

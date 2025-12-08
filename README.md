@@ -10,6 +10,9 @@ Self-Supporting Code is a resilience design pattern where system stability emerg
 
 
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/mg.png" alt="Middleground" width="500"/>
+</p>
 
 ## The Middle Ground: The Foundation of Self-Sufficiency
 

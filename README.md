@@ -1,10 +1,16 @@
-# Self-Supporting Code: A Resilience & Balance Design Pattern
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/ssc.png" alt="Self-Supporting Code Banner" />
+</p>
+
+
 
 ## Abstract
 
 Self-Supporting Code is a resilience design pattern where system stability emerges from the structural composition of components rather than external orchestration. Inspired by Leonardo da Vinci's self-supporting bridge—which stands through the geometric interlock of its beams without nails or ropes—and by the autonomous balancing mechanisms found in nature, this pattern embeds resilience into the architecture itself. Each module enforces local invariants, provides fallback behaviors, and maintains its own equilibrium, creating a system that self-governs without requiring external observability scaffolding.
 
-<img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/middleground.png" alt="Middleground" width="300"/>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/middleground.png" alt="Middleground" width="300"/>
+</p>
 
 
 ## The Middle Ground: The Foundation of Self-Sufficiency

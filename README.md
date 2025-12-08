@@ -151,7 +151,11 @@ Self-supporting ternary logic with observer:
 
 The observer state (⊙) adds a dimension traditional computing lacks: **predictive self-awareness**.
 
-# Natural Principles: The Foundation of Incorruptible Systems
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/np.png" alt="NP Diagram" width="1000"/>
+</p>
+
+
 
 ## The Problem With Human Intervention
 

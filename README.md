@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/ssc.png" alt="Self-Supporting Code Banner" />
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/ssc_1.png" alt="Self-Supporting Code Banner" />
 </p>
 
 

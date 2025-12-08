@@ -14,7 +14,10 @@ Self-Supporting Code is a resilience design pattern where system stability emerg
   <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/mg.png" alt="Middleground" width="500"/>
 </p>
 
-## The Middle Ground: The Foundation of Self-Sufficiency
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/tmg.png" alt="TMG Diagram" width="600"/>
+</p>
+
 
 ### The Binary Trap
 

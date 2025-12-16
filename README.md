@@ -1876,7 +1876,10 @@ The innovation here is not self-healing (that exists), but **self-awareness as a
 
 ---
 
-# Viral Symbiosis and Nano-Scale Self-Awareness: The Future of Autonomous Systems
+<div align="center">
+  <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/vp.png" alt="Viral Symbiosis and Nano-Scale Self-Awareness" />
+</div>
+
 
 ## Beyond Parasitism: Viruses as Collaborative Agents
 

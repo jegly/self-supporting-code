@@ -629,7 +629,11 @@ When we code these patterns as:
 
 Modern distributed systems depend heavily on external resilience mechanisms AND external observability: orchestrators restart failed services, monitoring systems watch for failures, and external dashboards reveal system health. While effective, these approaches share a fundamental limitation: they are **reactive, external, and dependent on scaffolding** outside the system itself.
 
-## The Trinity of Balance: Why Three Is The Architecture of Equilibrium
+<div align="center">
+  <img 
+src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/eq.png"
+ alt="The Trinity of Balance and Natural Entropy" />
+</div>
 
 ### The Mathematical Middle Ground
 

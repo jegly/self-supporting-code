@@ -3535,6 +3535,7 @@ This is not science fiction—it's the logical convergence of self-supporting sy
 https://medium.com/@jjjegly/weve-been-building-software-wrong-the-case-for-self-supporting-code-c7a61aa5b174
 
 *December 2025*
+ - *March 2026*
 
 ---
 

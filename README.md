@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/ssc_1.png" alt="Self-Supporting Code Banner" />
 </p>
 
-
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jegly/self-supporting-code)
 
 ## Abstract
 

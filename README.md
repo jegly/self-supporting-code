@@ -3642,7 +3642,7 @@ https://medium.com/@jjjegly/weve-been-building-software-wrong-the-case-for-self-
 
 *December 2025*
  - *March 2026*
-
+- *June 2026*
 ---
 
 *"The tree does not need a forester to tell it how to balance. The architecture is the awareness."*

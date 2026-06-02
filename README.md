@@ -6,7 +6,7 @@
 
 ## Abstract
 
-Self-Supporting Code is a resilience design pattern where system stability emerges from the structural composition of components rather than external orchestration. Inspired by Leonardo da Vinci's self-supporting bridge—which stands through the geometric interlock of its beams without nails or ropes—and by the autonomous balancing mechanisms found in nature, this pattern embeds resilience into the architecture itself. Each module enforces local invariants, provides fallback behaviors, and maintains its own equilibrium, creating a system that self-governs without requiring external observability scaffolding.
+Self-Supporting Code is a resilience design pattern where system stability emerges from the structural composition of components rather than external orchestration. Two self-balancing structures motivate the approach. Leonardo da Vinci's self-supporting bridge holds its form through the geometric interlock of its beams alone, without nails, rope, or fastening; living systems regulate themselves through analogous internal mechanisms. From these we abstract a single architectural commitment: that each component should *adapt to* maintain its own resilience from within, rather than have stability supplied *around* it. Every module enforces its own local invariants, carries its own fallback behaviour, and maintains its own equilibrium through **multiple layers of fallback logic and self-rendering checks**, so that the system as a whole self-governs without dependence on external observability scaffolding. Applied uniformly, this commitment yields systems that are structurally self-aware rather than only fault-tolerant. The claim is an ambitious one, and the *Related Work* section situates it deliberately against established theory: self-stabilization, autonomic computing, and the circuit-breaker pattern.
 
 
 
@@ -28,13 +28,15 @@ Traditional computing operates in absolutes:
 - **Success or Failure**
 - **Up or Down**
 
-This binary thinking extends to system design: a service is either healthy or unhealthy. A request either succeeds or fails. A component is either working or broken.
+This binary framing, appropriate at the level of logic gates and boolean predicates, becomes a liability when carried unexamined into the design of operational systems: a service is modelled as either healthy or unhealthy, a request as either succeeded or failed, a component as either working or broken. Such models are lossy—they discard precisely the information an operator most needs during the transition between states: the direction and rate of change, and the system's own estimate of how close it stands to failure.
 
 **But where is the middle ground?**
 
+> *A fair objection, raised up front:* parts of our toolkit already reach for a third state — the circuit breaker's **half-open** state, health checks that report **degraded**, backpressure that **throttles** rather than dropping. This thesis does not claim those don't exist; it claims they are **local, special-case discoveries of a general principle**. The argument is that the observer state (⊙) deserves to be a *uniform, structural* property of every component, not a widget bolted onto remote calls. See **[Related Work and Positioning](#related-work-and-positioning)** for an honest accounting against self-stabilization (Dijkstra, 1974), autonomic computing / MAPE-K (IBM), and circuit breakers.
+
 ### The Missing Dimension: The Observer State
 
-In nature and in physics, there exists a third state—not a compromise between extremes, but a **meta-state** that observes and measures the relationship between them:
+We answer that a third state is available—one found repeatedly in physical and biological systems. It is not a compromise or a midpoint between the two extremes, but a **meta-state**: a vantage from which the relationship between the extremes can itself be observed and measured.
 
 ```
 Binary Computing:           Self-Supporting Computing:
@@ -45,20 +47,11 @@ Binary Computing:           Self-Supporting Computing:
                                (The Observer)
 ```
 
-The middle ground (⊙) is not:
-- A fallback or degraded state
-- A "maybe" or uncertain value
-- A compromise between success and failure
-
-The middle ground IS:
-- **The awareness itself**
-- **The measuring instrument**  
-- **The consciousness of the system**
-- **The fulcrum that enables balance**
+We define the observer state (⊙) both negatively and positively. It is *not* a fallback path, a degraded mode, a "maybe" value, nor a compromise between success and failure—each of those remains a point on the binary axis. It is, rather, the system's *self-measurement*: the instrument by which a component estimates its own condition, the locus at which self-awareness arises, and—to borrow the structural metaphor that runs throughout this work—the fulcrum about which the component balances. Where the binary states record *what happened*, the observer state addresses a different question: *how am I doing, and what is likely to happen next?*
 
 ### Why The Middle Ground Changes Everything
 
-When you introduce the observer state, the system transcends binary execution:
+Introducing the observer state alters the structure of execution itself. Consider the two formulations below.
 
 **Without Middle Ground (Binary):**
 ```python
@@ -68,7 +61,7 @@ if result == SUCCESS:
 else:
     return fallback()
 ```
-*The system is blind. It only knows success or failure after the fact.*
+*Here the system is, in a precise sense, blind: it learns of success or failure only after the fact, and cannot act on that knowledge until the next request arrives.*
 
 **With Middle Ground (Ternary):**
 ```python
@@ -85,24 +78,15 @@ else:
     # System KNOWS it will likely fail - skip attempt
     result = use_fallback_immediately()
 ```
-*The system has self-awareness. It knows its own state before acting.*
+*Here the system consults an estimate of its own condition before acting. Knowledge of state precedes execution rather than trailing it.*
 
 ### The Middle Ground Is Self-Sufficiency
 
-This middle ground—the observer state—is what enables true self-sufficiency:
-
-1. **Without the middle ground**: System needs external monitoring to know its state
-2. **With the middle ground**: System IS the monitor of its own state
-
-The middle ground is where:
-- **Self-observation happens** - the system watches itself
-- **Self-awareness emerges** - the system understands its own health
-- **Self-correction originates** - the system decides its own actions
-- **Self-sufficiency exists** - the system needs no external scaffolding
+The observer state is what makes genuine self-sufficiency possible. A system that lacks it must obtain knowledge of its own condition from outside—an external monitor that watches and reports. A system that possesses it *is* the monitor of its own condition. Self-sufficiency, on this account, is not a feature bolted onto the architecture but a consequence of where the observer is placed: when self-observation, self-assessment, and self-correction all originate inside the component, no external scaffolding is required for the component to know and govern itself. (We are careful, in *Limitations*, to mark the cases where an independent external check nonetheless remains indispensable.)
 
 ### The Middle Ground in Physical Reality
 
-This isn't abstract philosophy—it's observable in nature:
+The claim is not merely philosophical; the same three-part structure recurs across natural and physical systems, in each of which a central element measures and regulates the relation between two extremes:
 
 | System | Binary States | Middle Ground (Observer) |
 |--------|---------------|-----------------------------|
@@ -114,16 +98,16 @@ This isn't abstract philosophy—it's observable in nature:
 | **Liquid Neural Network** | Input signal (1), No signal (0) | **Continuous ODE state** - adapts dynamics in real-time |
 | **Free Energy System** | Predicted state (1), Actual state (0) | **Variational free energy** - the gap being minimised |
 
-In each case, the middle ground is not neutral—it's **active awareness** of the relationship between extremes.
+In none of these cases is the central element passive. It is an active site of measurement—the relationship between the extremes rendered legible to the system itself.
 
 ### Self-Supporting Code Lives In The Middle Ground
 
-Traditional code executes in binary:
+Traditional control flow is linear and binary:
 ```
 Request → Process → Success or Failure
 ```
 
-Self-supporting code lives in the observer state:
+Self-supporting control flow folds observation into every stage:
 ```
 Request → Observe Self → Assess Tension → Choose Path → Execute → Measure Outcome → Adjust Understanding
          ↑______________|__________________|_____________|______________| 
@@ -131,7 +115,7 @@ Request → Observe Self → Assess Tension → Choose Path → Execute → Meas
                          (Continuous self-awareness)
 ```
 
-The middle ground is not a step in the process—it's the **layer of consciousness** that wraps the entire execution. The system doesn't just run; it **knows it's running**.
+Crucially, the observer state is not an additional *step* in the pipeline. It is a *layer* that wraps the entire execution—a continuous self-model maintained alongside the work itself. The system does not merely run; it maintains, at all times, a representation of how well it is running.
 
 ### The Ternary Truth Table
 
@@ -164,11 +148,9 @@ The observer state (⊙) adds a dimension traditional computing lacks: **predict
 
 ## The Problem With Human Intervention
 
-Almost anything in nature can be exploited if humans intervene. Perhaps external input IS the problem. Perhaps we need to rely less on external orchestration. **The best systems are simple and mimic nature by design.**
+Almost anything in nature can be exploited if humans intervene. The conjecture we pursue is that external input is itself a frequent source of fragility, and that systems benefit from reduced reliance on external orchestration. We adopt as a working principle that the most durable systems are simple and mimic nature by design.
 
-Perhaps humans—and our tendency to add external scaffolding, monitoring, and control—are the flaw in our systems.
-
-If we translate **incorruptible natural principles** into code, we can learn profound lessons. However, this requires thinking outside conventional laws and governing principles.
+On this view, the human tendency to add external scaffolding, monitoring, and control is not merely operational overhead but a structural weakness: each layer of supervision is itself a component that can fail. If we instead translate the principles by which natural systems remain robust into code, there is a great deal to be learned—though doing so requires reasoning beyond the conventional fixed-law framing of correctness.
 
 ## Beyond Fixed Laws: Patterns of Persistence
 
@@ -179,15 +161,13 @@ Traditional software engineering assumes fixed laws:
 - Requests **must** succeed or fail
 - Systems **must** be up or down
 
-But nature teaches us differently:
-- Gravity always applies... except when quantum particles tunnel through barriers, planes generate lift, or we discover exceptions we didn't account for. Fixed rules are theory, not absolute fact.
-- Sunlight always shines... but clouds block it (a variable we can't account for in the equation)
-- Time flows linearly... except that's a theory, not a fact
-- Bank accounts should never go negative... but they do, and systems must handle it
+Natural systems suggest a different stance. Each of the following "laws" admits exceptions that a rigid model fails to anticipate:
+- Gravity always applies—except where quantum particles tunnel through barriers, or wings generate lift, or some unaccounted-for condition intervenes. A fixed rule is a model, not an absolute.
+- Sunlight always shines—but clouds intervene, a variable absent from the idealised equation.
+- Time flows linearly—yet this too is a model rather than a settled fact.
+- Bank accounts should never go negative—yet in practice they do, and a robust system must accommodate the case rather than forbid it.
 
-- Rules always apply... until we discover exceptions we didn't account for.
-
-**Natural phenomena demonstrate resilience DESPITE variability.** These aren't incorruptible in the strict sense, but they embody **patterns of persistence** that transcend rigid laws.
+The pattern generalises: rules hold until an unaccounted-for exception is encountered. **Natural phenomena demonstrate resilience despite this variability.** They are not incorruptible in the strict sense; rather, they embody **patterns of persistence** that survive the failure of any individual rule.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/nrp.png" alt="NRP Diagram" width="600"/>
@@ -199,7 +179,7 @@ These patterns exist independent of physics or linear models—they are **archet
 ### 1. **Cycles** (Day/Night, Seasons, Tides)
 **Resilience through renewal**
 
-Not laws, but repeating rhythms. Systems that reset, regenerate, restart.
+These are not laws but repeating rhythms: systems that periodically reset, regenerate, and restart, deriving their resilience from renewal rather than from permanence.
 
 **In Code:**
 - Retry loops with exponential backoff
@@ -227,7 +207,7 @@ class CyclicRenewal:
 ### 2. **Emergence** (Flocks, Schools, Mycelium)
 **Resilience through distributed self-organization**
 
-Birds in flocks, fish in schools, mycelium networks—they don't follow a single law or central controller. They **self-organize**. The incorruptible part is the **pattern itself**—no single agent can corrupt the whole.
+Flocks of birds, schools of fish, and mycelial networks follow neither a single governing law nor a central controller; they **self-organise**. What proves incorruptible is the **pattern itself**: no individual agent can corrupt the whole.
 
 **In Code:**
 - Distributed consensus (Raft, Paxos)
@@ -236,7 +216,7 @@ Birds in flocks, fish in schools, mycelium networks—they don't follow a single
 - Blockchain consensus
 - Neural network emergence
 
-This emergence principle now has formal theoretical backing. **Causal emergence** (Erik Hoel) shows mathematically that macro-level descriptions are sometimes *causally more powerful* than micro-level ones—the collective is not just a sum of parts, it has causal powers that individual agents lack. **Integrated Information Theory (IIT)** provides a measure (Φ) for how much a system integrates information beyond the sum of its parts, explaining why distributed architectures can be more resilient than centralised ones. This is not metaphor—it is the mathematical reason your swarm is harder to kill than your monolith.
+This emergence principle now has formal theoretical backing. **Causal emergence** (Erik Hoel) shows mathematically that macro-level descriptions are sometimes *causally more powerful* than micro-level ones—the collective is not just a sum of parts, it has causal powers that individual agents lack. **Integrated Information Theory (IIT)** provides a measure (Φ) for how much a system integrates information beyond the sum of its parts, explaining why distributed architectures can be more resilient than centralised ones. This is not metaphor but the mathematical reason a swarm is harder to kill than a monolith.
 
 ```python
 class SwarmNode:
@@ -264,7 +244,7 @@ class SwarmNode:
 ### 3. **Balance** (Predator/Prey, Homeostasis)
 **Resilience through dynamic equilibrium**
 
-Ecosystems adapt dynamically, not by fixed rules but by feedback. This is the **middle ground (⊙)** in action.
+Ecosystems adapt dynamically through feedback rather than fixed rules—the **middle ground (⊙)** observed in operation.
 
 **In Code:**
 - Adaptive load balancing
@@ -272,12 +252,12 @@ Ecosystems adapt dynamically, not by fixed rules but by feedback. This is the **
 - Homeostatic controllers
 - Rate limiters that adjust to load
 
-Karl Friston's **Free Energy Principle (FEP)** provides the deepest formal account of this pattern. Every self-organising system—from a cell maintaining its membrane to a brain predicting sensory input—minimises *variational free energy*: the gap between what it expects and what it experiences. Your `_measure_tension()` function is a scalar approximation of this quantity. The FEP subsumes homeostasis, predictive coding, and active inference into a single mathematical framework, and is now being applied to design **self-regulating AI systems** and **synthetic biology controllers** that maintain target states without hard-coded rules. The implication for self-supporting code is profound: a system designed around free energy minimisation does not need explicit rules for every failure mode—it simply corrects toward its expected state.
+Karl Friston's **Free Energy Principle (FEP)** provides the deepest formal account of this pattern. Every self-organising system—from a cell maintaining its membrane to a brain predicting sensory input—minimises *variational free energy*: the gap between what it expects and what it experiences. The `_measure_tension()` function defined in this work is a scalar approximation of this quantity. The FEP subsumes homeostasis, predictive coding, and active inference into a single mathematical framework, and is now being applied to design **self-regulating AI systems** and **synthetic biology controllers** that maintain target states without hard-coded rules. The implication for self-supporting code is significant: a system designed around free energy minimisation does not need explicit rules for every failure mode, since it corrects toward its expected state on its own.
 
 ### 4. **Redundancy** (Seed Dispersal, Genetic Diversity)
 **Resilience through multiplicity**
 
-Seeds scatter everywhere. Most fail, but enough succeed. This isn't waste—it's resilience.
+Seeds are dispersed broadly; most fail, yet enough take root. The apparent profligacy is not waste but resilience through multiplicity.
 
 **In Code:**
 - Replication and sharding
@@ -313,11 +293,9 @@ class SeedDispersalPattern:
 ### 5. **Silence** (Stillness, Absence)
 **Resilience through graceful degradation**
 
-The untouched stillness of wilderness isn't a law—it's a state. Systems that fail quietly instead of catastrophically.
+The untouched stillness of wilderness is not a law but a state—and it has a computational analogue in systems that fail quietly rather than catastrophically.
 
-**If a tree falls in the forest and no one's around, does it make a sound?**
-
-In code: systems that degrade to null states without cascading failures.
+**If a tree falls in the forest and no one is present, does it make a sound?** The question is apt: a component may degrade to a null state without that degradation propagating as a cascading failure.
 
 **In Code:**
 - Graceful degradation
@@ -344,7 +322,7 @@ class SilentFailure:
 ### 6. **Symbiosis** (Bees and Flowers, Mycorrhizae)
 **Resilience through mutual benefit**
 
-Mutualistic relationships thrive because both sides benefit. It's incorruptible in the sense that **exploitation collapses the system**, so balance is self-enforcing.
+Mutualistic relationships persist precisely because both parties benefit. Such an arrangement is incorruptible in a specific sense: **exploitation collapses the system**, and so balance becomes self-enforcing.
 
 **Mycorrhizae:** Trees and fungi exchange nutrients through root networks. A tree cut back to a stump can regenerate even with no foliage because the fungal network supports it. **Trees can self-regulate their own nutrients.**
 
@@ -385,7 +363,7 @@ class SymbioticService:
 ### 7. **Fractals** (Snowflakes, Coastlines, Trees)
 **Resilience through self-similarity**
 
-Patterns repeat regardless of scale. Incorruptible because the pattern is the same whether you're looking at a branch or the whole tree.
+Patterns repeat regardless of scale—incorruptible because the pattern is identical whether one observes a single branch or the whole tree.
 
 **In Code:**
 - Recursive data structures
@@ -393,7 +371,7 @@ Patterns repeat regardless of scale. Incorruptible because the pattern is the sa
 - Microservices that mirror monolith structure
 - Organisational patterns that repeat at team/department/company level
 
-The fractal principle has been formalised in what Erik Hoel calls **causal emergence**: patterns at higher scales can have more causal power than their micro-level substrates. A microservice architecture that mirrors the monolith's logical structure at every scale isn't just aesthetically pleasing—it is computationally more robust, because the same invariants are enforced recursively. This connects directly to the layered consciousness model: self-awareness at every scale means no single failure can invalidate the whole pattern.
+The fractal principle has been formalised in what Erik Hoel calls **causal emergence**: patterns at higher scales can have more causal power than their micro-level substrates. A microservice architecture that mirrors the monolith's logical structure at every scale is not merely aesthetically pleasing—it is computationally more robust, because the same invariants are enforced recursively. This connects directly to the layered consciousness model: self-awareness at every scale means no single failure can invalidate the whole pattern.
 
 ```python
 class FractalComponent:
@@ -424,7 +402,7 @@ class FractalComponent:
 ### 8. **Flow** (Water Finding Paths, Rivers)
 **Resilience through continuous movement**
 
-Water is the **MIDDLE GROUND (⊙)**. Most things in nature rely on water to grow, survive, exist. Water doesn't stop—it flows around obstacles, finds new paths, keeps moving.
+Water is the **MIDDLE GROUND (⊙)**. Most living systems depend on it to grow, survive, and persist. Water does not stop: it flows around obstacles, finds new paths, and remains in continuous motion.
 
 **In Code:**
 - Streaming architectures
@@ -478,7 +456,7 @@ In code, the observer state is like water:
 
 ### Stateless Forms in Nature
 
-Of course, we have microbes, fungi, and bacteria that exist in darkness without such things. These **stateless forms** teach us about systems that need no persistent state:
+Microbes, fungi, and bacteria nonetheless persist in darkness without any such apparatus. These **stateless forms** are instructive for systems that require no persistent state:
 
 **In Code:**
 - Stateless functions (pure, reproducible)
@@ -513,6 +491,8 @@ Nature's most resilient systems are **closed loops**:
 - Water cycle
 - Nutrient cycles in ecosystems
 - Tree stumps regenerating through mycorrhizal networks
+
+These cycles obey a strict economy: a closed system conserves and recirculates a finite quantity of energy and matter rather than drawing indefinitely on an outside supply—a direct expression of the conservation of energy. A houseplant illustrates the principle exactly. Its growth is bounded by the size of its pot and by the water and nutrients held within it; it cannot exceed the budget of its enclosure, yet within that budget a well-matched plant and pot settle into a stable equilibrium. A self-supporting component should likewise operate within a fixed resource envelope, recirculating what it holds (cf. *Energy Budget Modelling* in *Future Directions*) rather than presupposing an unbounded external supply.
 
 **DNA as a closed-loop storage medium:** Microsoft and the University of Washington have demonstrated DNA data storage at scale—information encoded in synthetic DNA strands, retrieved by sequencing, and even computed upon using **DNA strand displacement circuits**. These circuits perform logic using chemistry alone: no external power, no silicon, no clock signal. Reactions use their own products as reactants, which is the `ClosedLoopSystem.recycle()` method running on actual molecules. The information persists for thousands of years at room temperature. This is the ultimate closed-loop: the medium, the computation, and the storage are one.
 
@@ -612,11 +592,27 @@ class RegenerativeComponent:
         pass
 ```
 
+### Regeneration in Nature: Biological Precedents
+
+The tree stump is one instance of a far broader phenomenon. Biological regeneration spans an extraordinary range of organisms, several of which exhibit recovery capabilities that exceed anything yet engineered in software. They are catalogued here not as ornament but as existence proofs: nature has repeatedly solved the problem of restoring function after catastrophic loss, using only locally available information and internally stored capacity.
+
+| Organism | Regenerative capability | Architectural analogue |
+|---|---|---|
+| **Hydra** | Regrows a complete body from a small fragment; effectively non-senescent | A component that reconstitutes full function from a minimal surviving core |
+| **Planarian flatworms** | Regenerate an entire organism—including a functioning brain—from a tissue fragment | State and behaviour recoverable from any sufficient subset of the system |
+| **Axolotl** (salamander) | Regrow limbs, organs, and spinal cord without scarring | Lossless, in-place repair of a failed subsystem, leaving no degraded residue |
+| **Sea stars** | Regenerate lost arms; some species regrow an entire body from a single arm | Single-shard recovery of the whole from one surviving replica |
+| **Immortal jellyfish** (*Turritopsis dohrnii*) | Reverts adult cells to an earlier developmental state, restarting its life cycle | Rollback to a known-good prior state and re-derivation forward |
+| **Deer antlers** | Fully regenerate complex bone-and-tissue structures annually | Scheduled, cyclic regeneration of expensive structures (cf. *Cycles*) |
+| **Mycelium** | Regrows after injury by extending new hyphae and re-fusing broken networks (anastomosis) | Distributed self-healing of a network's connectivity (see *Fungal Architecture*) |
+
+What unites these systems is that the information required to rebuild is held *internally*—in surviving cells, in stored energy, in the structural rules of growth—and recovery proceeds without external instruction. This is the biological template for self-healing fallback logic: a component should carry, within its own enclosed loop, sufficient latent capacity and structural rules to reconstitute itself after partial failure.
+
 ## Conclusion: Nature Beyond Laws
 
-If we set aside the rigid "laws" we think govern systems, we can see **patterns that inspire incorruptibility and resilience** without being bound to physics or linear models.
+Setting aside the rigid "laws" we suppose to govern systems brings into view a different class of organising principle—**patterns that confer resilience, and a form of incorruptibility,** without being bound to any particular physics or linear model.
 
-These aren't laws—they're **archetypes**:
+These are not laws but **archetypes**:
 - **Emergence**: Intelligence without control
 - **Symbiosis**: Cooperation as survival strategy
 - **Fractals**: Pattern consistency across scales
@@ -626,16 +622,7 @@ These aren't laws—they're **archetypes**:
 - **Flow**: Adaptation through movement
 - **Closed Loops**: Sustainability through recycling
 
-When we code these patterns as:
-- Self-supporting structures
-- Invariants that can flex
-- Fallbacks that feel natural
-- Autonomous recovery mechanisms
-- Distributed verification
-- Stateless components
-- Flowing architectures
-
-...we create systems that don't just run—they **persist**, like forests, like fungi, like water finding its way.
+Encoded deliberately—as self-supporting structures, as invariants that can flex, as fallbacks that follow naturally from the design, as autonomous recovery and distributed verification, as stateless components and flowing architectures—these patterns yield systems that persist rather than simply run: like forests, like fungi, like water finding its way.
 
 **The observer is the observed. The middle ground is water. The system is the forest.**
 
@@ -654,18 +641,15 @@ src="https://raw.githubusercontent.com/jegly/self-supporting-code/main/eq.png"
 
 Why three? Why not two, or four, or any other number?
 
-**Three implies balance through structure:**
-- A **start**, a **middle**, and an **end**
-- A **left**, a **center**, and a **right**  
-- A **failure (0)**, an **observer (⊙)**, and a **success (1)**
+**Three implies balance through structure:** a start, a middle, and an end; a left, a centre, and a right; a failure (0), an observer (⊙), and a success (1).
 
-Consider this: **How is two even?** An even number represents balance, but we don't count the space *between* numbers in mathematics, do we? Yet that's where balance lives—in the relationship between extremes, measured by the observer.
+The intuition is geometric. Balance does not reside at either extreme but in the *relationship* between them—and a relationship can only be represented and measured by a third element distinct from both. **Symmetry cannot exist without a middle.** A tree's symmetry emerges from its **central trunk**, the axis about which its branches balance; remove the trunk and one is left with scattered branches and no coherent structure. The middle ground is therefore not merely a *part* of the system but the **structural principle** that makes growth and balance possible at all.
 
-**Symmetry cannot exist without a middle.** 
+Consider the deeper claim hidden in the word *even*. An even number is taken to connote balance, yet evenness alone supplies no point of balance: divide two into its halves and nothing occupies the centre. Where, in a two, is the fulcrum? Symmetry, by contrast, always presupposes a middle—the line along which a sheet of paper folds onto itself lies exactly halfway, and without that central axis the two halves could never be brought into correspondence. To treat an even count as a sufficient model of balance is thus a subtle error: evenness may *imply* balance, but balance does not exist without the very middle that an even split omits.
 
-A tree's symmetry emerges from its **central trunk**—the axis around which branches balance. Remove the trunk, and you have scattered branches with no coherent structure. The middle ground isn't just *part* of the system; it's the **structural principle** that enables growth itself.
+Pythagoras recognised as much in describing three as the first number to possess a *beginning, a middle, and an end*—and, on that account, a perfect number. Three is the smallest structure that contains its own point of balance. The recurrence of triads throughout this work is therefore not numerological ornament but structural necessity: two states can name the extremes, but only a third can hold the centre.
 
-Without the middle, can there be growth? Can there be balance? The answer nature shows us repeatedly is: **no**.
+The implication extends well beyond software. Were balance—understood as the explicit inclusion of a central, mediating term—adopted as a first principle in the design of systems of many kinds, we might achieve markedly greater efficiency across a wide array of applications. One need only look at a tree to see that its symmetry could not exist without the central branch from which the others take their reference; **symmetry does not exist without a middle ground.** Much of the inefficiency we accept as given may in fact be an artefact of man-made constraints—conventions and elements adopted without examining whether they encode any balance at all, a flaw that quietly limits what we are able to create. Nature, consulted directly, tends to answer the question for us: signs of balance, organised around a middle, are visible **everywhere**.
 
 The **Free Energy Principle** formalises this intuition mathematically. A system minimising variational free energy must maintain an internal model (the middle ground) that represents the relationship between its predicted state and its actual state. Remove the internal model and the system cannot self-correct—it collapses to reactive binary: either matching its environment or not, with no capacity for anticipation. Three states are not a philosophical preference; they are the minimum structure for adaptive self-regulation.
 
@@ -834,14 +818,11 @@ class HeliotropicSystem:
 
 The waves of the ocean are **unpredictable variables**—a true source of randomness and entropy, just like wind and rain. 
 
-Sure, we can predict:
-- The tide (cyclical patterns)
-- Wind strength (pressure systems)
-- When it will rain (atmospheric conditions)
+Certain aggregate properties are predictable: the tide follows cyclical patterns, wind strength tracks pressure systems, rainfall correlates with atmospheric conditions. What remains irreducibly unpredictable is the fine detail—the exact point at which a given raindrop falls, the direction of a particular gust, the precise form of an individual cresting wave. These are **incalculable variables**, genuine sources of entropy.
 
-But predicting **exactly** where each raindrop falls, which direction each gust blows, how each wave crests? That's impossible. These are **incalculable variables**—sources of true entropy.
+Among these incalculable variables, **wind** is the one most often overlooked, and it is instructive precisely for that reason. Wind is a genuine source of entropy whose consequences ripple through an ecosystem in ways that cannot be traced back to their cause. A single strong gust on a single day may leave a seedling growing permanently slanted; years later, the mature tree's asymmetry silently encodes a perturbation that no model ever recorded. Many faults in software logic share this character—they originate in perturbations equally small, equally transient, and equally unrecorded—which is why a resilient system must be built to absorb them rather than to predict them.
 
-**This applies directly to system errors.**
+**The same distinction applies directly to system errors.**
 
 Just as nature has countless sources of naturally occurring chaos, so do distributed systems:
 - Network latency spikes (the wind)
@@ -849,7 +830,7 @@ Just as nature has countless sources of naturally occurring chaos, so do distrib
 - Memory pressure (the drought)
 - Race conditions (the turbulent eddy)
 
-You cannot predict the exact moment a disk will fail, any more than you can predict the exact shape of a wave. But you can **design systems that navigate chaos autonomously**, just like a tree bends in the wind or a fish swims against currents.
+One cannot predict the exact moment a disk will fail, any more than one can predict the exact shape of a wave. One can, however, **design systems that navigate chaos autonomously**—as a tree bends in the wind, or a fish holds its station against a current.
 
 ### Self-Awareness in Turbulent Systems
 
@@ -976,7 +957,7 @@ class ChaosTolerantSystem:
 
 ### Anticipatory Logic: Simulating Failure Before It Happens
 
-**Self-supporting systems don't just react to chaos—they anticipate it.**
+**Self-supporting systems do not merely react to chaos; they anticipate it.** The aim is *foresight of the unseen*: to account for faults in logic before they occur, so that when a fault arrives the response is already in place—a self-correcting fallback whose contingency has been provided for in advance rather than improvised after the fact. The problem, in effect, has already been accounted for.
 
 Just as meteorologists simulate weather patterns to predict storms, self-supporting systems should **simulate fault scenarios** to understand how logic behaves under stress:
 
@@ -1043,15 +1024,13 @@ class FaultSimulator:
 
 ### The Symbiotic Paradox
 
-Most flowers need pollination from bees. Does this mean bees are **external observability**? 
-
-Not quite. Bees are **within the closed-loop system**—they're part of the ecosystem's self-regulating cycle:
+Most flowering plants depend on bees for pollination. Does this dependency make the bee a form of **external observability**—an outside agent upon which the system relies? It does not. The bee operates **within the closed-loop system**, as a participant in the ecosystem's own self-regulating cycle:
 
 ```
 Flowers produce nectar → Bees collect nectar → Bees pollinate flowers → Flowers reproduce → More flowers produce nectar
 ```
 
-The loop is **closed**—no external intervention required. The bee isn't monitoring the flower from outside; the bee **is part of the flower's reproductive strategy**.
+The loop is **closed**—no external intervention is required. The bee does not monitor the flower from outside; it **is part of the flower's reproductive strategy**.
 
 This is the key insight for closed-loop systems: **some external-looking dependencies are actually internal to the larger system**.
 
@@ -1188,9 +1167,9 @@ The Gaia hypothesis is no longer merely poetic. **Earth system science** has for
 
 Just as mycelium acts as a distributed brain for forests, and neurons form networks in brains, we can create **artificial nervous systems** for technological ecosystems.
 
-**Neuromorphic computing** is the hardware realisation of this bridge. Intel's Loihi 2 and IBM's NorthPole chip implement spiking neural networks directly in silicon: neurons that only fire when their membrane potential crosses a threshold, consuming energy proportional to the *deviation from equilibrium* rather than running a constant clock. This is your `HomeostasisController` in hardware—a physical observer state that activates only when imbalance is detected, drawing near-zero power when the system is stable. NorthPole achieves 25× better energy efficiency than GPU inference precisely because it embeds the observer state structurally.
+**Neuromorphic computing** is the hardware realisation of this bridge. Intel's Loihi 2 and IBM's NorthPole chip implement spiking neural networks directly in silicon: neurons that only fire when their membrane potential crosses a threshold, consuming energy proportional to the *deviation from equilibrium* rather than running a constant clock. This is, in effect, the `HomeostasisController` realised in hardware—a physical observer state that activates only when imbalance is detected, drawing near-zero power when the system is stable. NorthPole achieves 25× better energy efficiency than GPU inference precisely because it embeds the observer state structurally.
 
-**Cortical organoids**—miniature brain-like structures grown from human stem cells—represent the furthest extension of this bridge. Cortical Labs' DishBrain (2022) demonstrated that cortical organoids could learn to play Pong when coupled to a feedback electrode array. The organoid was not programmed; it **self-organised** its electrical activity in response to environmental signals. This is your `LayeredConsciousness` class instantiated in biological tissue. The practical implication for self-supporting architecture is profound: biological neural substrates may eventually serve as the physical layer of distributed, adaptive computation—systems that learn from failure not by updating weights, but by growing new connections.
+**Cortical organoids**—miniature brain-like structures grown from human stem cells—represent the furthest extension of this bridge. Cortical Labs' DishBrain (2022) demonstrated that cortical organoids could learn to play Pong when coupled to a feedback electrode array. The organoid was not programmed; it **self-organised** its electrical activity in response to environmental signals. This is, in effect, the `LayeredConsciousness` class instantiated in biological tissue. The practical implication for self-supporting architecture is considerable: biological neural substrates may eventually serve as the physical layer of distributed, adaptive computation, systems that learn from failure by growing new connections rather than by updating weights.
 
 ```python
 class LayeredConsciousness:
@@ -1403,7 +1382,7 @@ Self-supporting systems must account for:
 - Clusters observe collective patterns
 - The system observes emergent properties
 
-**Everything in nature has self-awareness.** Our challenge is to embed that same awareness into the systems we build—creating architectures that don't just run, but **live, adapt, and balance** themselves.
+**Everything in nature exhibits some form of self-awareness.** The challenge is to embed that same awareness into the systems we build: architectures that **live, adapt, and balance** themselves rather than simply running.
 
 Like Gaia itself: a planetary organism that no one controls, yet maintains equilibrium through distributed awareness and symbiotic cooperation.
 
@@ -1411,7 +1390,7 @@ Like Gaia itself: a planetary organism that no one controls, yet maintains equil
 
 ### The Tree Principle: Self-Balancing Architecture
 
-Consider a tree: the central stalk serves as the axis of balance, while branches extend asymmetrically yet maintain equilibrium. Even a non-symmetrical tree will redistribute its weight—growing denser foliage on one side, strengthening certain branches, adjusting its center of gravity—to counteract imbalance. The tree doesn't require an external observer to tell it where to grow; it **feels** its own imbalance through internal structural forces and corrects autonomously.
+Consider a tree: the central stalk is the axis of balance, while branches extend asymmetrically yet maintain equilibrium. Even a non-symmetrical tree redistributes its weight to counteract imbalance, growing denser foliage on one side, strengthening certain branches, and adjusting its centre of gravity. The tree doesn't require an external observer to tell it where to grow; it **feels** its own imbalance through internal structural forces and corrects autonomously.
 
 This is the missing dimension in traditional resilience patterns: **self-awareness through internal balance**.
 
@@ -1428,7 +1407,7 @@ Traditional Binary:     Self-Balancing Ternary:
   Light| Dark             Light| Awareness| Dark
 ```
 
-The center `⊙` is not a middle ground or compromise—it's the **observing axis** that measures the tension between extremes and maintains equilibrium. This is where self-supporting code transcends external observability: the system doesn't need to be watched because it **watches itself**.
+The centre `⊙` is not a midpoint or compromise but the **observing axis** that measures the tension between extremes and maintains equilibrium. Here, self-supporting code transcends external observability: the system need not be watched, because it **watches itself**.
 
 ### Self-Governance Through Internal Symmetry
 
@@ -1529,11 +1508,17 @@ from typing import Optional, Any
 from dataclasses import dataclass
 
 class BalanceState(Enum):
-    """Ternary state representing system balance."""
-    SUCCESS = 1      # Primary path operating normally
-    OBSERVING = 0.5  # System aware of tension, measuring
-    DEGRADED = 0     # Fallback path active
-    
+    """
+    Ternary state representing system balance.
+
+    String values (not numbers) so the enum is never accidentally used in
+    arithmetic. The "1 / ⊙ / 0" framing is conceptual; the *tension* float
+    on BalancedResult carries the actual scalar.
+    """
+    SUCCESS = "success"      # Primary path operating normally (1)
+    OBSERVING = "observing"  # System aware of tension, measuring (⊙)
+    DEGRADED = "degraded"    # Fallback path active (0)
+
 @dataclass
 class BalancedResult:
     """Result that carries awareness of its own balance state."""
@@ -1541,6 +1526,7 @@ class BalancedResult:
     state: BalanceState
     tension: float  # 0.0 (perfect balance) to 1.0 (extreme imbalance)
     rebalance_action: Optional[str] = None
+    observer_state: Optional[dict] = None  # Snapshot of pre-execution self-assessment
     
     def is_balanced(self) -> bool:
         """Check if system is in equilibrium."""
@@ -1706,7 +1692,14 @@ class TreeBranch:
         return (self.current_load + weight) <= self.capacity
     
     def accept_load(self, weight: float):
-        """Accept load and adjust capacity (grow stronger)."""
+        """
+        Accept load and adjust capacity (grow stronger).
+
+        This is *antifragility* (Taleb), not mere resilience: the branch does
+        not just survive sustained load, it gains capacity from it — a convex
+        response to stress. (A real implementation must also *shrink* idle
+        capacity, or it ratchets upward forever; see note below.)
+        """
         self.current_load += weight
         # Tree principle: branches strengthen under consistent load
         if self.load_percentage() > 0.8:
@@ -1829,8 +1822,10 @@ class SuperpositionState(Generic[T]):
         This is where the quantum analogy becomes concrete.
         """
         if self.collapse_strategy == StateCollapse.NEVER:
-            # Return weighted blend if possible
-            return self._blend() if hasattr(self, '_blend') else self.primary_value
+            # Stay "uncollapsed": default to the higher-confidence branch.
+            # (A numeric T could be blended as confidence*primary +
+            # (1-confidence)*fallback; for the general case we pick a side.)
+            return self.primary_value if self.confidence >= 0.5 else self.fallback_value
         
         # Collapse based on confidence
         return self.primary_value if self.confidence > 0.5 else self.fallback_value
@@ -2282,19 +2277,30 @@ Self-supporting systems embed awareness INTO their structure:
 System → Observes Self → Corrects Self → Reports Self (optional)
 ```
 
-The system doesn't need external eyes because it HAS eyes. The architecture itself IS the observer.
+The system requires no external eyes because it possesses its own; the architecture itself is the observer.
 
 ### The Qubit Insight: Three States of Existence
 
-In quantum computing, a qubit exists in **superposition** until measured. It's not 0 OR 1—it's a probability cloud of both states simultaneously. Similarly, self-supporting systems operate in three states:
-
-1. **Primary State (1)**: System operating optimally
-2. **Degraded State (0)**: System operating with fallbacks
-3. **Observing State (⊙)**: System AWARE of the relationship between 1 and 0
-
-The third state is the revolutionary insight: the system doesn't just execute, it UNDERSTANDS its own execution.
+The three states established earlier — Primary (1), Degraded (0), and Observing (⊙) — become concrete when an operation carries its own success probability into execution. (For why this is an *analogy* to qubit superposition and not literal quantum behavior, see *Distinguishing Self-Supporting Code from Quantum Computing*.) The point is operational: the system carries a forecast of its own execution, so that a failure can be classified as *expected* or *surprising*.
 
 ```python
+class AwareException(Exception):
+    """
+    An exception that carries the system's self-assessment at failure time.
+    The key field is `expected`: a failure the observer *predicted* (high
+    tension) is a different signal from a *surprising* one (low tension).
+    """
+    def __init__(self, original_exception: Exception, expected: bool,
+                 observer_state: dict):
+        self.original_exception = original_exception
+        self.expected = expected
+        self.observer_state = observer_state
+        super().__init__(
+            f"{'expected' if expected else 'SURPRISING'} failure: "
+            f"{original_exception!r}"
+        )
+
+
 class AwareOperation:
     """Operation that knows its own success probability."""
     
@@ -2640,7 +2646,7 @@ class SeesawBalance(Generic[T]):
 
 ### 1. Emergence of Consciousness (System Self-Awareness)
 
-When a system can observe its own state, measure its own balance, and adjust its own behaviour, it exhibits a primitive form of **consciousness**:
+When a system can observe its own state, measure its own balance, and adjust its own behaviour, it exhibits a primitive form of structural self-reference—a property that, with appropriate caution about the term, we may describe as a rudimentary form of **consciousness**:
 
 ```
 Traditional System:
@@ -2660,15 +2666,15 @@ Self-Supporting System:
 
 This is the ternary state (⊙) in action: the system exists not just in binary states but in a **meta-state** that observes the binary states.
 
-**Integrated Information Theory (IIT)** proposes that consciousness corresponds to the degree of integrated information (Φ) a system possesses—how much information is generated by the whole beyond the sum of its parts. A system with an embedded observer state (⊙) has higher Φ than a purely reactive binary system, because the observer integrates information across the primary and fallback paths simultaneously. Self-supporting code is, in IIT terms, a higher-consciousness architecture.
+**Integrated Information Theory (IIT)** proposes that consciousness corresponds to the degree of integrated information (Φ) a system possesses—how much information is generated by the whole beyond the sum of its parts. IIT is genuinely contested and computing Φ for any real system is intractable, so this should be read as *analogy, not claim*: an embedded observer state (⊙) integrates information across the primary and fallback paths that a purely reactive binary branch does not, which is loosely the kind of whole-greater-than-parts integration IIT tries to formalize. The word "consciousness" here is a deliberate metaphor for *structural self-reference*, not a literal assertion that the software is sentient.
 
 ### 2. The Observer Is The Observed
 
-In quantum mechanics, the act of observation changes the observed system. In self-supporting systems, the **observer IS the observed**:
+In quantum mechanics, the act of observation changes the observed system. In self-supporting systems, the **observer is the observed**:
 
-- The component doesn't just execute; it WATCHES itself execute
-- The system doesn't just process; it KNOWS it's processing
-- The architecture doesn't just run; it UNDERSTANDS it's running
+- The component observes itself as it executes
+- The system registers that it is processing, not only that it has processed
+- The architecture maintains a model of its own running
 
 This self-reflexive property eliminates the need for external observability.
 
@@ -2691,18 +2697,18 @@ The pattern is universal: **internal sensors → internal processing → interna
 
 ## Conclusion: Beyond Scaffolding
 
-Self-Supporting Code is not about eliminating monitoring tools—it's about changing their role from **necessity to luxury**. The system should function perfectly without Prometheus, Grafana, or PagerDuty. These tools become:
+Self-Supporting Code is not an argument for eliminating monitoring tools; it is an argument for changing their role from **necessity to luxury**. A self-supporting system should function correctly without Prometheus, Grafana, or PagerDuty. Under this design, such tools are reassigned to:
 
 - **Historical analysis**: Understanding long-term patterns
 - **Curiosity satisfaction**: Humans wanting to see what the system already knows
 - **Regulatory compliance**: External reporting requirements
 - **Optimisation research**: Finding even better balance points
 
-But the system itself? It stands alone, like da Vinci's bridge, like a tree in the forest, like a living organism. It doesn't need external eyes because it has its own. It doesn't need external coordination because it coordinates itself. It doesn't need external balance because balance is its structure.
+The system itself, however, stands alone—like da Vinci's bridge, like a tree in the forest, like a living organism. It requires no external eyes, because it has its own; no external coordination, because it coordinates itself; no externally imposed balance, because balance is intrinsic to its structure.
 
-The ternary state—the observer state, the qubit state, the fulcrum—is the key innovation. It's the axis around which the system balances, the consciousness through which it perceives itself, the foundation upon which true self-sufficiency is built.
+The ternary observer state—equivalently the qubit-like state, or the fulcrum—is the central contribution of this work: the axis about which the system balances, the means by which it perceives itself, and the foundation on which genuine self-sufficiency rests.
 
-This is code that doesn't just execute. It **exists**.
+This is code that does not merely execute. It **exists**.
 
 ---
 
@@ -2754,21 +2760,85 @@ While this thesis uses quantum computing analogies (qubits, superposition, obser
 
 The "middle ground" (⊙) in self-supporting systems is not a quantum superposition—it's a **structural property**: a component that measures the tension between success and failure states, calculates its own balance, and makes decisions accordingly. 
 
-Think of it this way:
-- **Quantum qubit**: A photon that is simultaneously vertically and horizontally polarized until measured
-- **Self-supporting observer state**: A function that calculates `tension = 1.0 - success_rate` and uses that metric to choose behaviour
+The distinction can be put concretely:
+- **Quantum qubit**: a photon that is simultaneously vertically and horizontally polarised until measured
+- **Self-supporting observer state**: a function that computes `tension = 1.0 - success_rate` and uses that metric to choose its behaviour
 
-The quantum analogies in this document are **metaphors** to illustrate concepts like "existing in multiple states" or "awareness of state." The actual implementation is conventional software with unconventional self-awareness built into its architecture—like a tree that doesn't need quantum mechanics to know when its branches are unbalanced.
+The quantum analogies in this document are **metaphors** to illustrate concepts like "existing in multiple states" or "awareness of state." The actual implementation is conventional software with unconventional self-awareness built into its architecture—like a tree, which requires no quantum mechanics to register when its branches are unbalanced.
 
-## Note on Existing Systems
+## Related Work and Positioning
 
-While several systems implement aspects of autonomous recovery—notably **Erlang/OTP supervisors** with their "let it crash" philosophy and supervision trees, **Kubernetes controllers** with reconciliation loops, and **cloud auto-healing** mechanisms—none fully embody the core principle of this thesis.
+Self-Supporting Code does not arrive in a vacuum. Several deep traditions in computer science have circled the same intuition — that a system should keep itself correct without an external babysitter. Honesty about them makes the contribution of this thesis *sharper*, not weaker: SSC is best understood as a **synthesis and a stance**, not a claim that self-correction was never attempted before.
 
-Existing self-healing systems rely on **external observers**: Erlang supervisors watch worker processes, Kubernetes controllers monitor pod states, and cloud platforms depend on health check endpoints and monitoring stacks (Prometheus, CloudWatch, etc.). These are reactive, external mechanisms that sit **outside** the components they protect.
+### Self-Stabilization (Dijkstra, 1974)
 
-**Self-Supporting Code differs fundamentally:** The observer is **embedded within** the component itself. The architecture doesn't need external scaffolding to know its own state—it measures its own tension, calculates its own balance, and corrects its own trajectory. External monitoring becomes optional documentation rather than required infrastructure.
+The closest formal ancestor is Edsger Dijkstra's *self-stabilization* (EWD391, "Self-stabilization in spite of distributed control"). A distributed algorithm is **self-stabilizing** if, starting from an *arbitrary* state, it is guaranteed to converge to a *legitimate* state in a finite number of steps and remain there — with **no external intervention**. This is, almost word for word, the resilience claim of this thesis, and it was made fifty years ago. Self-stabilization gives SSC two things it otherwise lacks:
 
-The innovation here is not self-healing (that exists), but **self-awareness as a structural property**—the ternary observer state (⊙) that makes systems truly self-sufficient, like trees that don't need foresters to tell them when their branches are unbalanced.
+- **Vocabulary.** "Legitimate state set," **convergence**, and **closure** are the rigorous versions of what this thesis calls *equilibrium*, *rebalancing*, and *staying balanced*.
+- **A bar to clear.** A genuinely self-supporting component should be *provably* self-stabilizing for its core invariant, not merely "feel" autonomous. (See *Future Directions §7* on Lyapunov proofs — convergence of the tension metric is exactly a closure-and-convergence argument.)
+
+**What SSC adds:** Dijkstra's model says nothing about *graceful degradation* or *what the system does while it is still illegitimate*. SSC's ternary observer state (⊙) is precisely about the transient: choosing a fallback path, shedding load, and reporting honestly **during** the journey back to a legitimate state, not only guaranteeing arrival.
+
+### Autonomic Computing and the MAPE-K Loop (IBM, 2001–2006)
+
+IBM's *autonomic computing* initiative (Kephart & Chess, "The Vision of Autonomic Computing," 2003) defined the **self-\* properties** — self-configuring, self-healing, self-optimizing, self-protecting — and the canonical control architecture for them: the **MAPE-K loop** (Monitor → Analyze → Plan → Execute, over a shared Knowledge base). The execution loop at the heart of this thesis —
+
+> observe self → assess tension → choose path → execute → measure outcome → adjust understanding
+
+— **is a MAPE-K loop.** `_measure_tension()` is Monitor+Analyze; the threshold branch is Plan; the path selection is Execute; the success window is Knowledge.
+
+**What SSC adds — and where it takes a real position:** classical autonomic computing tends to place MAPE-K in a *separate manager element* that supervises a managed resource (the same shape as a Kubernetes controller). SSC argues this separation is the flaw: the loop should be **embedded structurally inside the component**, so there is no privileged manager to lose. This is a genuine architectural opinion, and it is falsifiable — see *Limitations* for when the separation is actually the right call.
+
+### Circuit Breakers Are Already Ternary
+
+The most important prior art to confront directly is the **circuit breaker** (popularized by Nygard's *Release It!*; implemented in Hystrix, Resilience4j, Polly). It is **not** binary. It has three states — **Closed**, **Open**, and **Half-Open** — and the **half-open state is an observer state**: the breaker admits a trial trickle of requests, *measures itself*, and decides whether to recover, all with no human in the loop. Bulkheads, retries with backoff, and graceful fallbacks are likewise embedded, structural, self-monitoring mechanisms in wide production use.
+
+So the claim "binary computing has no middle ground" is too strong as stated, and this thesis should not lean on it. The honest framing:
+
+> The circuit breaker is the observer state (⊙) discovered *locally*, for one concern (downstream call health). SSC's contribution is to take that exact idea — a self-measuring third state that drives self-correction — and treat it as a **general design principle applied uniformly across every component and every concern** (load, freshness, resource budget, trust), rather than a special-case widget bolted onto remote calls.
+
+In other words: the circuit breaker proves the pattern works. SSC generalizes it.
+
+### A Note on Erlang/OTP and Kubernetes
+
+Erlang/OTP supervision trees and Kubernetes reconciliation loops are the production embodiments of "let it crash and recover." It would be inaccurate to call these purely *external* — an Erlang supervisor is part of the application; a Kubernetes operator can run in-cluster. The accurate distinction is **topological**: both use a *supervisor/controller hierarchy* where recovery logic lives in a node above the thing being recovered, which means the recovering authority is itself a failure domain. SSC's wager is that pushing the recovery logic *down into the leaf* removes that privileged node. This is a trade-off, not a free win (a leaf cannot restart its own process the way a supervisor can), and the two approaches compose well.
+
+### Antifragility (Taleb)
+
+Several patterns here go beyond resilience into **antifragility** (Taleb): they don't merely survive stress, they *improve* from it. `TreeBranch.accept_load()` grows capacity under sustained load; `SeesawBalance` strengthens the weight of whichever path keeps succeeding; the success window biases future routing toward what works. On the fragile → robust → resilient → **antifragile** spectrum, these exhibit a *convex* (gain-from-disorder) response. Naming this is useful: it tells a designer that a self-supporting component should, where possible, treat load and failure as *training signal*, not just threat.
+
+### Where That Leaves the Contribution
+
+The novel claim of this thesis is **not** "self-healing" or "the observer state" in isolation — both have precedent. It is the **unification**:
+
+> Self-stabilization's convergence guarantee + autonomic computing's MAPE-K loop + the circuit breaker's ternary self-measurement, **embedded structurally and uniformly into every component, and motivated by a coherent set of patterns drawn from how nature self-regulates** — such that external observability becomes optional documentation rather than required life-support.
+
+That is a defensible, specific thesis. It survives contact with the prior art instead of pretending the prior art doesn't exist.
+
+## Limitations and When *Not* to Use This
+
+A design pattern that claims to fit everywhere fits nowhere. Self-Supporting Code has real costs and real failure modes, and an honest proposal names them.
+
+### 1. A component cannot always save itself
+The hardest limit is physical. A leaf component can shed load, switch to a fallback, or degrade gracefully — but it **cannot restart its own crashed process, reclaim its own leaked memory after an OOM kill, or reschedule itself onto a healthy host.** Some recovery genuinely requires an authority *outside* the failure domain. This is exactly what supervisor/controller hierarchies (Erlang/OTP, Kubernetes) are for. SSC and supervision are **complementary**: embed self-correction for everything a component *can* fix itself; keep a supervisor for the things it structurally cannot. Treating SSC as a replacement for supervision is a mistake.
+
+### 2. The observer is not free — beware metabolic cost
+Self-measurement consumes the very resources it is trying to protect. A component that spends more CPU, memory, and latency observing itself than it saves through autonomous correction is a net loss (see *Future Directions §8, Energy Budget Modelling*). The discipline is **sparse observation**: measure only when the predicted state diverges from the observed state beyond a threshold, not on a constant clock. If the correction cannot be shown to pay for the observation, the observer should not be added.
+
+### 3. Self-reported health can lie
+"The system knows its own state" is the central promise — and the central risk. A component's self-assessment is only as good as its sensors and its model. A corrupted, deadlocked, or adversarially-influenced component may confidently report `status: optimal` while failing. This is why "external observability becomes optional" must be read carefully: **external, independent verification is precisely what is required when the component's self-report cannot be trusted** (Byzantine conditions, security boundaries, regulated environments, post-incident forensics). Self-observation reduces *routine* dependence on scaffolding; it does not abolish the need for an independent check.
+
+### 4. Local optimization can produce global pathology
+Components that each rebalance locally, without coordination, can oscillate, thrash, or converge on a globally bad equilibrium — the distributed-systems version of metastable failure. Independent retry/backoff loops famously synchronize into retry storms. Emergent behavior cuts both ways: the same local rules that produce graceful self-organization can produce self-organized collapse. Self-stabilization gives the tool to reason about this (does the *whole* system converge?), and it is not automatic.
+
+### 5. Determinism, testability, and debuggability
+Adaptive, history-dependent routing (success windows, decaying confidence, expression modulation) makes behavior **harder to reproduce and test**. The same input can take different paths depending on recent history. This is a real tax on debuggability and on the kind of deterministic guarantees some systems require. Where reproducibility matters more than adaptivity (e.g., financial ledgers, anything needing exact replay), prefer explicit, stateless logic.
+
+### 6. When binary really is correct
+Some invariants are not negotiable and *should* be hard, binary rules: authorization (allowed/denied), financial integrity (the books balance or they don't), safety interlocks. The "patterns of persistence over fixed laws" framing is a heuristic for *availability and degradation* concerns, **not** a license to soften correctness or security invariants. Don't put a fuzzy "tension threshold" on a permission check.
+
+### Summary: where SSC earns its keep
+SSC is most valuable for **availability-oriented, degradable, high-volume** concerns where partial service beats no service: request routing, caching, rate limiting, load distribution, backpressure, fallback selection. It is least valuable for **correctness-critical, low-volume, or externally-adjudicated** concerns. Use it as one layer in a defense-in-depth strategy, underneath honest external verification and above a supervisor that can do what a leaf cannot.
 
 ---
 
@@ -2777,13 +2847,15 @@ The innovation here is not self-healing (that exists), but **self-awareness as a
 </div>
 
 
+> **Scope note — speculative horizon.** Everything from here to the end of the document is a deliberate *extrapolation* of the software pattern onto biology and nanotechnology. It is meant as vision and analogy, not as a validated engineering claim. The software thesis above stands on its own without any of it. The biological systems cited (xenobots, anthrobots, DishBrain, base editing, JCVI-syn3A) are real and referenced, but the proposed *applications* — autonomous medical nano-swarms, cellular reprogramming, cancer therapy — are research-horizon speculation, not demonstrated results. Read this section as "what the principle might point toward," and weight it accordingly.
+
 ## Beyond Parasitism: Viruses as Collaborative Agents
 
 Traditional computing treats viruses as purely antagonistic—malicious code that corrupts the host system. But nature reveals a different story: **endogenous retroviruses** make up ~8% of human DNA, remnants of ancient viral infections that now serve essential functions in placental development and immune regulation. These viruses don't work **against** the host—they work **for** the host in mutual cooperation.
 
 This is the **middle ground (⊙)** applied to biological computing: neither pathogen nor native code, but a **third state**—the symbiotic agent that exists between self and other.
 
-The discovery of **endogenous retroviral elements (ERVs)** in regulatory regions of the genome has deepened this picture further. ERVs don't just provide functional genes—they contribute **enhancer sequences** that modulate the expression of neighbouring genes across developmental stages. They are, in effect, embedded observers: ancient code that has been repurposed as regulatory middleware, tuning expression rather than executing function. This is precisely the CRISPRa/i model applied to evolutionary timescales: symbiotic integration producing continuous modulation rather than binary presence/absence.
+The discovery of **endogenous retroviral elements (ERVs)** in regulatory regions of the genome has deepened this picture further. ERVs do not merely provide functional genes—they contribute **enhancer sequences** that modulate the expression of neighbouring genes across developmental stages. They are, in effect, embedded observers: ancient code that has been repurposed as regulatory middleware, tuning expression rather than executing function. This is precisely the CRISPRa/i model applied to evolutionary timescales: symbiotic integration producing continuous modulation rather than binary presence/absence.
 
 **In Code:**
 
@@ -2830,13 +2902,13 @@ class SymbioticAgent:
 
 When we embed autonomous systems at the **nano-scale**—whether nanobots in medical applications or bio-inspired nanotech—we need a fundamentally different architecture. Individual nanobots have minimal computing capacity, but the **swarm** must exhibit:
 
-1. **Collective awareness** (like bee hive consciousness)
+1. **Collective awareness** (like the hive consciousness of bees and ant colonies)
 2. **Distributed decision-making** (like schools of fish)
 3. **Network resilience** (like mycelium's distributed brain)
 
 This is where the **middle ground (⊙)** becomes essential: the swarm exists in superposition between individual agents (0/1) and collective intelligence (⊙).
 
-The physical precedent is now established. Michael Levin's group at Tufts University demonstrated that **Xenobots**—living robots assembled from frog embryo cells—self-organise into novel morphologies not present in the original organism, and can even exhibit collective kinematic memory. More remarkably, **anthrobots** (2023), assembled from human tracheal cells, spontaneously form multi-cellular assemblies that repair damaged neural tissue in vitro—with no genetic modification, no programmed behaviour. The emergent healing behaviour arises purely from the interaction rules between cells. This is your `NanoSwarm.execute_mission()` method running on actual human biology: distributed, autonomous, goal-directed without central command.
+The physical precedent is now established. Michael Levin's group at Tufts University demonstrated that **Xenobots**—living robots assembled from frog embryo cells—self-organise into novel morphologies not present in the original organism, and can even exhibit collective kinematic memory. More remarkably, **anthrobots** (2023), assembled from human tracheal cells, spontaneously form multi-cellular assemblies that repair damaged neural tissue in vitro—with no genetic modification, no programmed behaviour. The emergent healing behaviour arises purely from the interaction rules between cells. This is, in effect, the `NanoSwarm.execute_mission()` method running on actual human biology: distributed, autonomous, and goal-directed without central command.
 
 ```python
 from typing import List, Set, Tuple
@@ -3000,10 +3072,14 @@ Fungi demonstrate the ultimate self-healing architecture:
 
 1. **Mycelium networks** can regenerate after injury by extruding new hyphae
 2. **Broken networks** heal by fusing hyphae back together (anastomosis)
-3. **Distributed resilience** - no single point of failure because the network IS the organism
+3. **Distributed resilience** — no single point of failure, because the network *is* the organism
 4. **Resource redistribution** - nutrients flow through the network to where they're needed
 
 The electrical signalling dimension adds a new layer. Mycelium propagates slow voltage waves (measured at ~0.5mm/s) in response to mechanical disturbance and chemical stimuli. These signals propagate across the entire network, coordinating responses to damage or nutrient gradients without any central processor. Recent work has explored using mycelium networks as **physical computing substrates**—routing electrical signals through fungal hyphae to perform simple logical operations. The hyphae are not just a metaphor for distributed computing; they may become the medium.
+
+The same distributed self-repair appears across the microbial world. **Microbe colonies** coordinate through **quorum sensing**—chemical signalling by which individual cells infer local population density and switch collective behaviour accordingly—and organise into **biofilms**, self-structuring communities far more robust than any isolated cell. Emerging nanotechnology is beginning to reproduce such coordination under control that is external in origin yet internal in operation: engineered agents and biofilms that can be steered **acoustically, via sound and ultrasound**, supplying a coordinating signal that travels through the medium itself rather than through any central controller.
+
+Synthesising these mechanisms yields a concrete architectural prescription. A self-healing fallback layer modelled on fungal mycelium—able to regenerate after injury by extending new paths, and to repair a severed network by re-fusing its connections (anastomosis)—provides a self-enclosed loop system with a redundancy method of unusual reliability. Combined with the stateless, self-governing principles developed throughout this work, the result is a fallback architecture that degrades gracefully and reconstitutes itself autonomously: a robust redundancy substrate for stateless systems that are self-governed, self-aware, and self-healing within their own enclosure.
 
 **Applying fungal principles to self-enclosed systems:**
 
@@ -3503,13 +3579,13 @@ When we design systems—whether software services, nano-scale swarms, or fungal
 - **Free energy minimisation** (correcting toward expected state)
 - **The observer state (⊙)** (self-awareness as structural property)
 
-...we create systems that don't just execute—they **live**. They adapt, heal, balance, and eventually dissolve when their purpose is fulfilled. Like a virus that evolves from pathogen to symbiont, from foreign to integrated, from threat to benefit.
+...we obtain systems that **persist and adapt** rather than simply executing. They heal, rebalance, and, where the design calls for it, dissolve once their purpose is fulfilled, much as a virus may pass from pathogen to symbiont, from foreign body to integrated function, from threat to benefit.
 
-The future of resilient systems is not more monitoring, more orchestration, more external scaffolding. It's **embedding awareness into the structure itself**—making the architecture alive.
+The thesis, finally, is this: the future of resilient systems lies not in more monitoring, more orchestration, or more external scaffolding, but in **embedding awareness into the structure itself**—in making the architecture, in a precise structural sense, self-aware.
 
 ### Medical Breakthrough Potential: Inoperable Cancers
 
-The most profound application of nano-scale self-supporting systems lies in treating conditions currently considered untreatable. **Inoperable tumours**—those too deep, too intertwined with critical tissue, or too diffuse to remove surgically—represent one of medicine's greatest challenges.
+The most consequential application of nano-scale self-supporting systems lies in treating conditions currently considered untreatable. **Inoperable tumours**—those too deep, too intertwined with critical tissue, or too diffuse to remove surgically—represent one of medicine's greatest challenges.
 
 Self-supporting nano-swarms could address this by:
 
@@ -3522,10 +3598,40 @@ Self-supporting nano-swarms could address this by:
 
 **The crucial innovation:** These systems don't require external control or imaging guidance. They operate autonomously, using the same principles that allow mycelium to find nutrients in soil or immune cells to find pathogens in blood—**distributed sensing, collective decision-making, and emergent intelligence**.
 
-For a patient with an inoperable glioblastoma deep in the brain, or pancreatic cancer wrapped around vital arteries, this architecture could be the difference between "nothing more we can do" and complete remission. The swarm doesn't need to see the whole tumour—each agent only needs to sense its immediate environment and communicate with neighbours. The **middle ground (⊙)** enables each nanobot to understand: "Am I near cancer? What are my neighbours sensing? What should I do?"
+For a patient with an inoperable glioblastoma deep in the brain, or pancreatic cancer wrapped around vital arteries, this architecture could be the difference between "nothing more we can do" and complete remission. The swarm need not perceive the whole tumour; each agent need only sense its immediate environment and communicate with its neighbours. The **middle ground (⊙)** enables each nanobot to understand: "Am I near cancer? What are my neighbours sensing? What should I do?"
 
-This is not science fiction—it's the logical convergence of self-supporting system principles with nano-scale bioengineering, base editing precision, and the emergent biology of xenobots and anthrobots already demonstrated in laboratory conditions.
+To be clear about the gap: the *building blocks* cited (xenobots, anthrobots, base/prime editing) are real and demonstrated in the laboratory; the *integrated autonomous cancer-treating nano-swarm* described here is **not** — it is a research-horizon extrapolation, with formidable unsolved problems in power, navigation, biocompatibility, control, and safety. The value of framing it this way is not a promise of imminent cures, but a hypothesis about *architecture*: if such systems are ever built, the evidence from biology suggests they will need to be **distributed, self-sensing, and self-limiting** rather than centrally commanded. That architectural claim is the part this thesis actually defends.
 
+
+## References
+
+Citations for the prior art and scientific results invoked throughout. Where a claim in the text is analogy rather than established result, that is flagged inline; this list points to the real work behind the names.
+
+**Foundations in computer science**
+- Dijkstra, E. W. (1974). "Self-stabilizing systems in spite of distributed control." *Communications of the ACM*, 17(11), 643–644. (EWD391 / EWD426.)
+- Kephart, J. O., & Chess, D. M. (2003). "The Vision of Autonomic Computing." *IEEE Computer*, 36(1), 41–50. (Autonomic computing; the MAPE-K reference loop.)
+- IBM (2006). *An Architectural Blueprint for Autonomic Computing* (4th ed.). (MAPE-K elaborated.)
+- Nygard, M. T. (2018). *Release It! Design and Deploy Production-Ready Software* (2nd ed.). Pragmatic Bookshelf. (Circuit breaker, bulkhead, steady-state patterns.)
+- Resilience4j / Netflix Hystrix / Polly — production implementations of circuit breaker (Closed/Open/Half-Open), bulkhead, rate limiter, retry.
+- Taleb, N. N. (2012). *Antifragile: Things That Gain from Disorder*. Random House.
+
+**Theory of self-organizing systems**
+- Friston, K. (2010). "The free-energy principle: a unified brain theory?" *Nature Reviews Neuroscience*, 11(2), 127–138. (FEP / active inference.)
+- Tononi, G. (2004); Oizumi, Albantakis & Tononi (2014). Integrated Information Theory (Φ). *Note: IIT is actively contested; used here as analogy only.*
+- Hoel, E. P., Albantakis, L., & Tononi, G. (2013). "Quantifying causal emergence shows that macro can beat micro." *PNAS*, 110(49). 
+- Lyapunov stability / PD control — standard control theory; see e.g. Khalil, *Nonlinear Systems*.
+
+**Engineered and biological substrates cited**
+- Hasani, R., Lechner, M., Amini, A., Rus, D., & Grosu, R. (2021). "Liquid Time-constant Networks." *AAAI*. (Liquid neural networks; commercialized via Liquid AI.)
+- Kriegman, S., Blackiston, D., Levin, M., & Bongard, J. (2020). "A scalable pipeline for designing reconfigurable organisms." *PNAS*, 117(4). (Xenobots.)
+- Gumuskaya, G., et al. (Levin lab) (2023). "Motile Living Biobots Self-Construct from Adult Human Somatic Progenitor Cells." *Advanced Science*. (Anthrobots; neural-repair observation in vitro.)
+- Kagan, B. J., et al. (2022). "In vitro neurons learn and exhibit sentience when embodied in a simulated game-world." *Neuron*. (DishBrain.)
+- Hutchison, C. A., et al. (2016) and Pelletier, J. F., et al. (2021). JCVI-syn3.0 / syn3A minimal cell. *Science* / *Cell*. (473-gene synthetic minimal organism.)
+- Komor, A. C., et al. (Liu lab) (2016). "Programmable editing of a target base in genomic DNA without double-stranded DNA cleavage." *Nature*; Anzalone, A. V., et al. (2019), prime editing, *Nature*.
+- Modha, D. S., et al. (2023). IBM NorthPole. *Science*; Davies, M., et al. (2018). Intel Loihi. *IEEE Micro*. (Neuromorphic, event-driven compute.)
+- Organick, L., et al. (2018). "Random access in large-scale DNA data storage." *Nature Biotechnology*. (Microsoft / UW DNA storage and strand-displacement computing.)
+
+---
 
 ## Author
 
